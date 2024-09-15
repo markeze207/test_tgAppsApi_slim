@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\core\Database;
-use Exception;
 use PDO;
 
 class User
@@ -75,13 +74,14 @@ class User
      */
     public function create($name): array
     {
-        try {
-            $users = $this->pdo->prepare("INSERT INTO `users` (`ID`, `name`) VALUES (?, ?)");
+        $users = $this->pdo->prepare("INSERT INTO `users` (`ID`, `name`) VALUES (?, ?)");
 
-            $users->execute(array($this->id, $name));
-            return ['result' => 'Пользователь успешно создан','status' => true];
-        } catch (Exception $e) {
-            return ['result' => 'Произошла ошибка '.$e->getMessage(),'status' => false];
+        $users->execute(array($this->id, $name));
+
+        if ($users->rowCount() > 0) {
+            return ['result' => 'Пользователь успешно создан', 'status' => true];
+        } else {
+            return ['result' => 'Ошибка при создании пользователя', 'status' => false];
         }
     }
 }

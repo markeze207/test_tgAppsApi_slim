@@ -13,33 +13,9 @@ $app->post('/auth', function ($request, $response, array $args) {
     $webhook_data = file_get_contents('php://input');
     $data = json_decode($webhook_data, true);
 
-    if (!empty($data['initData'])) {
-        $initData = $data['initData'];
+    $validateController = new ValidateController();
+    $result = $validateController->startValidate($data);
 
-        $validateClass = new ValidateController();
-
-        $data = $validateClass->validate($_ENV['BOT_TOKEN'], $initData);
-
-        if ($data['status']) {
-            $userController = new UserController($data['user']['id']);
-            $user = $userController->get();
-            if (!$user['status']) {
-                $userCreate = $userController->create($data['user']['username']);
-
-                if ($userCreate['status']) {
-                    $result = ['result' => $data['jwt'], 'status' => true];
-                } else {
-                    $result = ['result' => 'Произошла ошибка создания пользователя', 'status' => false];
-                }
-            } else {
-                $result = ['result' =>  $data['jwt'], 'status' => true];
-            }
-        } else {
-            $result = ['result' =>  'Произошла ошибка генерации' ,'status' => false];
-        }
-    } else {
-        $result = ['result' =>  'Некорректные данные', 'status' => false];
-    }
     $result['time'] = microtime(true) - $start;
     $response->getBody()->write(json_encode($result));
     return $response;
