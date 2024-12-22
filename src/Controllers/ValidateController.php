@@ -13,7 +13,8 @@ class ValidateController
         }
 
         $initData = $data['initData'];
-        $data = $this->validate($_ENV['BOT_TOKEN'], $initData);
+        $validateClass = new Validate();
+        $data = $validateClass->validate($_ENV['BOT_TOKEN'], $initData);
 
         if (!$data['status']) {
             return ['result' => 'Произошла ошибка генерации', 'status' => false];
@@ -37,20 +38,5 @@ class ValidateController
         }
 
         return ['result' => 'Произошла ошибка создания пользователя', 'status' => false];
-    }
-    public function validate($bot_token, $initData): array
-    {
-        if (Validate::isSafe($bot_token, $initData)) {
-            $validateClass = new Validate();
-            $query = $validateClass->parseQuery($initData);
-
-            $user = json_decode($query['user'], true);
-
-            $jwt = $validateClass->generateToken($user['id']);
-
-            return ['jwt' => $jwt, 'user' => $user, 'status' => true];
-        } else {
-            return ['status' => false];
-        }
     }
 }

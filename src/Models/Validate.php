@@ -59,4 +59,19 @@ class Validate
 
         return JWT::encode($payload, $secretKey, 'HS256');
     }
+
+    public function validate($bot_token, $initData): array
+    {
+        if (Validate::isSafe($bot_token, $initData)) {
+            $query = self::parseQuery($initData);
+
+            $user = json_decode($query['user'], true);
+
+            $jwt = self::generateToken($user['id']);
+
+            return ['jwt' => $jwt, 'user' => $user, 'status' => true];
+        } else {
+            return ['status' => false];
+        }
+    }
 }
