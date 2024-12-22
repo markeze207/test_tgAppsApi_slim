@@ -48,24 +48,25 @@ class User
 
         $tasksArray = $tasksData->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($tasksArray) {
-            foreach ($tasksArray as $key => $task) {
-                $userData = $this->pdo->prepare("SELECT `task_id` FROM tasks_users WHERE user_id = ? AND task_id = ?");
+        return $this->getCompeteTasks($tasksArray);
+    }
 
-                $userData->execute(array($this->id, $task['ID']));
+    public function getCompeteTasks($tasks): array
+    {
+        foreach ($tasks as $key => $task) {
+            $userData = $this->pdo->prepare("SELECT `task_id` FROM tasks_users WHERE user_id = ? AND task_id = ?");
 
-                $userTasks = $userData->fetch(PDO::FETCH_ASSOC);
+            $userData->execute(array($this->id, $task['ID']));
 
-                if ($userTasks) {
-                    $tasksArray[$key]['competed'] = true;
-                } else {
-                    $tasksArray[$key]['competed'] = false;
-                }
+            $userTasks = $userData->fetch(PDO::FETCH_ASSOC);
+
+            if ($userTasks) {
+                $tasksArray[$key]['competed'] = true;
+            } else {
+                $tasksArray[$key]['competed'] = false;
             }
-            return ['result' => $tasksArray, 'status' => true];
-        } else {
-            return ['result' => 'Задания не найдены', 'status' => false];
         }
+        return ['result' => $tasksArray ?? 'Задания не найдены', 'status' => true];
     }
 
     /**
