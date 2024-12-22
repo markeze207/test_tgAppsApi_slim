@@ -46,8 +46,6 @@ class Pool
     {
         foreach($pools as $key => $pool)
         {
-            $pools[$key]['createTime'] = gmdate("Y-m-d\TH:i:s\Z", $pool['createTime']);
-
             $userModel = new User($pool['userId']);
 
             $user = $userModel->get()['result'];
