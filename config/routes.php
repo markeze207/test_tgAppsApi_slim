@@ -35,6 +35,18 @@ $app->group('/api', function (RouteCollectorProxy $apiGroup) {
 
             return $response;
         });
+
+        $groupTask->get('/getTop', function ($request, $response, array $args) {
+            global $start;
+
+            $poolController = new \App\Controllers\PoolController();
+            $poolNew = $poolController->getTop();
+            $poolNew['time'] = microtime(true) - $start;
+
+            $response->getBody()->write(json_encode($poolNew));
+
+            return $response;
+        });
     });
 
     // Users group

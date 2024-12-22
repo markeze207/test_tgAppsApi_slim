@@ -14,4 +14,10 @@ class PoolController
         $poolModel = new Pool();
         return $poolModel->getNew();
     }
+
+    public function getTop()
+    {
+        $poolModel = new Pool();
+        return $poolModel->getTop();
+    }
 }

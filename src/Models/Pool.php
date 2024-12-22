@@ -22,16 +22,19 @@ class Pool
     public function getNew(): array
     {
         try {
-            $oneMinuteAgo = time() - 120;
-            $sql = "SELECT * FROM pool WHERE createTime BETWEEN ? AND ?";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([$oneMinuteAgo, time()]);
+            $sql = "SELECT p.*, u.name AS creatorName, u.avatar AS creatorAvatar,
+                   (SELECT COUNT(*) FROM holders h WHERE h.poolId = p.ID) AS holdersCount
+            FROM pool p
+            LEFT JOIN users u ON p.userId = u.id
+            ORDER BY p.createTime ASC
+            LIMIT 50";
 
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
             $pools = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             if ($pools) {
-                $poolsResult = $this->getPoolUser($pools);
-                $data = ['result' => $poolsResult, 'status' => true];
+                $data = ['result' => $pools, 'status' => true];
             } else {
                 $data = ['result' => 'Пулы не найдены', 'status' => false];
             }
@@ -42,19 +45,34 @@ class Pool
         return $data;
     }
 
-    public function getPoolUser($pools): array
+    public function getTop(): array
     {
-        foreach($pools as $key => $pool)
-        {
-            $userModel = new User($pool['userId']);
+        try {
+            $sql = "SELECT p.*, 
+                   u.name AS creatorName, 
+                   u.avatar AS creatorAvatar, 
+                   COUNT(h.poolId) AS holdersCount
+            FROM pool p
+            LEFT JOIN holders h ON p.id = h.poolId
+            LEFT JOIN users u ON p.userId = u.id
+            GROUP BY p.id
+            ORDER BY holdersCount DESC
+            LIMIT 50";
 
-            $user = $userModel->get()['result'];
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            $pools = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $pools[$key] += [
-                'creatorName' => $user['name'] ?? null,
-                'creatorAvatar' => $user['avatar'] ?? null,
-            ];
+            if ($pools) {
+                $data = ['result' => $pools, 'status' => true];
+            } else {
+                $data = ['result' => 'Пулы не найдены', 'status' => false];
+            }
+        } catch (\Exception $exception) {
+            $data = ['result' => $exception->getMessage(), 'status' => false];
         }
-        return $pools;
+
+        return $data;
     }
+
 }
