@@ -22,15 +22,6 @@ class UserController
     }
 
     /**
-     * @return array
-     */
-    public function getTasks(): array
-    {
-        $userModel = new User($this->id);
-        return $userModel->getCompeteTasks();
-    }
-
-    /**
      * @param $name
      * @return array
      */

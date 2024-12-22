@@ -1,6 +1,8 @@
 <?php
 $start = microtime(true);
-
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: public, max-age=50');
@@ -17,17 +19,13 @@ $dotenv->load();
 $app = AppFactory::create();
 
 $app->add(new Tuupola\Middleware\JwtAuthentication([
-    "header" => "X-Token",
     "path" => "/api",
     "secret" => $_ENV['SECRET_KEY'],
     "algorithm" => ["HS256"],
     "error" => function ($response, $arguments) {
-        $data["status"] = false;
-
         $response->getBody()->write(
-            json_encode(['result' => 'Некорректный токен', 'status' => $data["status"]])
+            json_encode(['result' => 'Некорректный токен', 'status' => false])
         );
-
         return $response->withHeader("Content-Type", "application/json");
     }
 ]));

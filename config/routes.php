@@ -1,13 +1,11 @@
 <?php
 global $app;
 
-use App\Controllers\TasksController;
 use App\Controllers\UserController;
 use App\Controllers\ValidateController;
 use Slim\Routing\RouteCollectorProxy;
 
-$app->post('/auth', function ($request, $response, array $args) {
-
+$app->get('/auth', function ($request, $response, array $args) {
     global $start;
 
     $webhook_data = file_get_contents('php://input');
@@ -23,6 +21,22 @@ $app->post('/auth', function ($request, $response, array $args) {
 
 // API group
 $app->group('/api', function (RouteCollectorProxy $apiGroup) {
+
+    // Pool group
+    $apiGroup->group('/pool', function (RouteCollectorProxy $groupTask) {
+        $groupTask->get('/getNew', function ($request, $response, array $args) {
+            global $start;
+
+            $poolController = new \App\Controllers\PoolController();
+            $poolNew = $poolController->getNew();
+            $poolNew['time'] = microtime(true) - $start;
+
+            $response->getBody()->write(json_encode($poolNew));
+
+            return $response;
+        });
+    });
+
     // Users group
     $apiGroup->group('/users', function (RouteCollectorProxy $group) {
 
@@ -51,32 +65,6 @@ $app->group('/api', function (RouteCollectorProxy $apiGroup) {
             return $response;
         });
 
-        $group->get('/getTasks', function ($request, $response, array $args) {
-            global $start;
-            $token = $request->getAttribute("token");
 
-            $userController = new UserController($token['sub']);
-            $user = $userController->getTasks();
-            $user['time'] = microtime(true) - $start;
-
-            $response->getBody()->write(json_encode($user));
-
-            return $response;
-        });
-    });
-
-    // Tasks group
-    $apiGroup->group('/tasks', function (RouteCollectorProxy $groupTask) {
-        $groupTask->get('/getAll', function ($request, $response, array $args) {
-            global $start;
-
-            $tasksController = new TasksController();
-            $user = $tasksController->getAll();
-            $user['time'] = microtime(true) - $start;
-
-            $response->getBody()->write(json_encode($user));
-
-            return $response;
-        });
     });
 });

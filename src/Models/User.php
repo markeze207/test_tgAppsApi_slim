@@ -36,26 +36,6 @@ class User
         }
     }
 
-    public function getCompeteTasks(): array
-    {
-        $tasksModel = new Tasks();
-        $tasks = $tasksModel->getAll();
-        foreach ($tasks as $key => $task) {
-            $userData = $this->pdo->prepare("SELECT `task_id` FROM tasks_users WHERE user_id = ? AND task_id = ?");
-
-            $userData->execute(array($this->id, $task['ID']));
-
-            $userTasks = $userData->fetch(PDO::FETCH_ASSOC);
-
-            if ($userTasks) {
-                $tasksArray[$key]['competed'] = true;
-            } else {
-                $tasksArray[$key]['competed'] = false;
-            }
-        }
-        return ['result' => $tasksArray ?? 'Задания не найдены', 'status' => true];
-    }
-
     /**
      * @param $name
      * @return array
@@ -64,7 +44,7 @@ class User
     {
         $users = $this->pdo->prepare("INSERT INTO `users` (`ID`, `name`) VALUES (?, ?)");
 
-        $users->execute(array($this->id, $name));
+        $users->execute(array($this->id, htmlspecialchars($name)));
 
         if ($users->rowCount() > 0) {
             return ['result' => 'Пользователь успешно создан', 'status' => true];
