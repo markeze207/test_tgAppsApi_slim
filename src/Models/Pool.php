@@ -50,8 +50,10 @@ class Pool
 
             $user = $userModel->get()['result'];
 
-            $pools[$key]['creatorName'] = $user['name'] ?? NULL;
-            $pools[$key]['creatorAvatar'] = $user['avatar'] ?? NULL;
+            $pools[$key] += [
+                'creatorName' => $user['name'] ?? null,
+                'creatorAvatar' => $user['avatar'] ?? null,
+            ];
         }
         return $pools;
     }
