@@ -36,23 +36,10 @@ class User
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getTasks(): array
+    public function getCompeteTasks(): array
     {
-
-        $tasksData = $this->pdo->prepare("SELECT * FROM tasks");
-
-        $tasksData->execute();
-
-        $tasksArray = $tasksData->fetchAll(PDO::FETCH_ASSOC);
-
-        return $this->getCompeteTasks($tasksArray);
-    }
-
-    public function getCompeteTasks($tasks): array
-    {
+        $tasksModel = new Tasks();
+        $tasks = $tasksModel->getAll();
         foreach ($tasks as $key => $task) {
             $userData = $this->pdo->prepare("SELECT `task_id` FROM tasks_users WHERE user_id = ? AND task_id = ?");
 

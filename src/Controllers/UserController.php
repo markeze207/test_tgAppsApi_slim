@@ -27,7 +27,7 @@ class UserController
     public function getTasks(): array
     {
         $userModel = new User($this->id);
-        return $userModel->getTasks();
+        return $userModel->getCompeteTasks();
     }
 
     /**
